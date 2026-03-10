@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard</title>
+<link rel="icon" type="image/x-icon" href="https://du11hjcvx0uqb.cloudfront.net/dist/images/favicon-e10d657a73.ico">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f13;
+    --surface: #1a1a22;
+    --surface2: #22222d;
+    --border: #2e2e3e;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --accent: #6c63ff;
+    --accent2: #ff6584;
+    --correct: #4caf7d;
+    --wrong: #f06060;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── NAV ── */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    height: 56px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  .logo span { color: var(--accent); }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .nav-right a {
+    text-decoration: none;
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 7px;
+    transition: all 0.15s;
+  }
+  .nav-right a:hover { color: var(--text); background: var(--surface2); }
+  .nav-right a.active { color: var(--text); background: var(--surface2); }
+
+  /* ── CONTROLS BAR ── */
+  .controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 40px 14px;
+  }
+
+  .search-random-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    max-width: 520px;
+  }
+
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 180px;
+  }
+  .search-wrap svg {
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    opacity: 0.4;
+  }
+  .search-wrap input {
+    width: 100%;
+    padding: 8px 12px 8px 34px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 0.82rem;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .search-wrap input::placeholder { color: var(--muted); }
+  .search-wrap input:focus { border-color: var(--accent); }
+
+  .sort-btns {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .sort-btn {
+    padding: 6px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .sort-btn:hover { color: var(--text); border-color: #444; }
+  .sort-btn.active { color: var(--text); background: var(--accent); border-color: var(--accent); }
+
+  .random-btn {
+    padding: 7px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .random-btn:hover { background: var(--accent); border-color: var(--accent); }
+
+  /* ── GAMES GRID ── */
+  .grid-wrap { padding: 0 40px 40px; }
+
+  .games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+
+  .game-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    position: relative;
+  }
+  .game-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(108,99,255,0.18);
+  }
+  .game-card.coming-soon { opacity: 0.45; cursor: default; }
+  .game-card.coming-soon:hover { transform: none; box-shadow: none; border-color: var(--border); }
+
+  .card-thumb {
+    width: 100%;
+    aspect-ratio: 16/10;
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.6rem;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .card-thumb::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 60%, rgba(108,99,255,0.08));
+  }
+
+  .card-body { padding: 10px 12px 12px; }
+
+  .card-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .card-meta {
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+
+  .card-tag {
+    display: inline-block;
+    font-size: 0.62rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-top: 6px;
+  }
+  .tag-play { background: rgba(108,99,255,0.18); color: var(--accent); }
+  .tag-soon { background: rgba(255,255,255,0.06); color: var(--muted); }
+
+  /* ── SECTION LABEL ── */
+  .section-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    padding: 0 40px 12px;
+  }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(6px);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 32px;
+    position: relative;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+    animation: slideUp 0.22s ease;
+  }
+  @keyframes slideUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+
+  .modal-close {
+    position: absolute; top: 14px; right: 14px;
+    background: var(--surface2); border: 1px solid var(--border);
+    width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+    font-size: 0.85rem; color: var(--muted);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .modal-close:hover { color: var(--text); background: var(--border); }
+
+  .modal h2 { font-size: 1.3rem; font-weight: 700; margin-bottom: 6px; }
+  .modal p.sub { font-size: 0.8rem; color: var(--muted); margin-bottom: 20px; }
+
+  /* category btns */
+  .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 18px; }
+  .cat-btn {
+    padding: 12px; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 9px; cursor: pointer; text-align: left; font-family: inherit;
+    transition: all 0.15s; color: var(--text);
+  }
+  .cat-btn:hover, .cat-btn.sel { border-color: var(--accent); background: rgba(108,99,255,0.1); }
+  .cat-btn .ci { font-size: 1.2rem; display: block; margin-bottom: 4px; }
+  .cat-btn .cn { font-weight: 600; font-size: 0.82rem; display: block; }
+  .cat-btn .cc { font-size: 0.68rem; color: var(--muted); }
+
+  /* progress */
+  .prog-bar { height: 3px; background: var(--surface2); border-radius: 2px; margin-bottom: 20px; overflow: hidden; }
+  .prog-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.35s ease; }
+
+  .q-meta { display: flex; justify-content: space-between; margin-bottom: 14px; font-size: 0.75rem; color: var(--muted); }
+  .q-score { color: var(--accent); font-weight: 600; }
+
+  .q-text { font-size: 1.05rem; font-weight: 600; line-height: 1.4; margin-bottom: 18px; }
+
+  .opts { display: flex; flex-direction: column; gap: 7px; }
+  .opt-btn {
+    padding: 11px 14px; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 9px; cursor: pointer; font-family: inherit; font-size: 0.82rem;
+    text-align: left; color: var(--text); transition: all 0.15s;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .opt-btn:hover:not(:disabled) { border-color: var(--accent); background: rgba(108,99,255,0.1); }
+  .opt-btn .ol { width: 24px; height: 24px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.68rem; font-weight: 700; flex-shrink: 0; }
+  .opt-btn.correct { border-color: var(--correct); background: rgba(76,175,125,0.1); }
+  .opt-btn.correct .ol { background: var(--correct); color: #fff; }
+  .opt-btn.wrong { border-color: var(--wrong); background: rgba(240,96,96,0.1); }
+  .opt-btn.wrong .ol { background: var(--wrong); color: #fff; }
+  .opt-btn:disabled { cursor: default; }
+
+  .feedback { margin-top: 12px; padding: 10px 13px; border-radius: 8px; font-size: 0.8rem; font-weight: 500; display: none; }
+  .feedback.show { display: block; }
+  .feedback.correct { background: rgba(76,175,125,0.12); color: var(--correct); }
+  .feedback.wrong { background: rgba(240,96,96,0.12); color: var(--wrong); }
+
+  .btn-main {
+    width: 100%; padding: 11px; background: var(--accent); color: #fff;
+    border: none; border-radius: 9px; font-family: inherit; font-size: 0.85rem;
+    font-weight: 600; cursor: pointer; transition: all 0.15s; margin-top: 6px;
+  }
+  .btn-main:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+  .btn-next {
+    margin-top: 14px; width: 100%; padding: 11px; background: var(--surface2);
+    color: var(--text); border: 1px solid var(--border); border-radius: 9px;
+    font-family: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer;
+    transition: all 0.15s; display: none;
+  }
+  .btn-next.show { display: block; }
+  .btn-next:hover { background: var(--border); }
+
+  .btn-sec {
+    width: 100%; padding: 10px; background: transparent; color: var(--muted);
+    border: 1px solid var(--border); border-radius: 9px; font-family: inherit;
+    font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.15s; margin-top: 8px;
+  }
+  .btn-sec:hover { color: var(--text); border-color: #555; }
+
+  /* result */
+  .res-circle {
+    width: 100px; height: 100px; border-radius: 50%;
+    border: 3px solid var(--accent); display: flex; flex-direction: column;
+    align-items: center; justify-content: center; margin: 0 auto 20px;
+    box-shadow: 0 0 24px rgba(108,99,255,0.25);
+  }
+  .res-num { font-size: 2rem; font-weight: 700; color: var(--accent); line-height: 1; }
+  .res-of { font-size: 0.65rem; color: var(--muted); }
+  .res-title { font-size: 1.3rem; font-weight: 700; text-align: center; margin-bottom: 4px; }
+  .res-sub { text-align: center; color: var(--muted); font-size: 0.8rem; margin-bottom: 20px; }
+  .res-breakdown { background: var(--surface2); border-radius: 10px; padding: 12px 16px; margin-bottom: 18px; display: flex; justify-content: space-around; }
+  .bd-item { text-align: center; }
+  .bd-num { font-size: 1.2rem; font-weight: 700; display: block; }
+  .bd-label { font-size: 0.65rem; color: var(--muted); }
+
+  /* flag */
+  .flag-big { font-size: 4.5rem; text-align: center; padding: 16px 0; line-height: 1; }
+
+  /* 2048 */
+  .grid2048 { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; background: #1e1e28; border-radius: 8px; padding: 6px; margin: 14px 0; }
+  .cell2048 { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 5px; font-weight: 800; font-size: 1.15rem; background: #2a2a38; color: var(--muted); min-height: 52px; transition: background 0.1s; }
+
+  /* snake */
+  #snakeCanvas { display: block; margin: 0 auto; border-radius: 8px; max-width: 100%; }
+
+  /* game score row */
+  .game-score-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .g-score-val { font-size: 1.3rem; font-weight: 700; }
+  .g-new-btn {
+    padding: 5px 12px; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 7px; font-family: inherit; font-size: 0.75rem; color: var(--muted);
+    cursor: pointer; transition: all 0.15s;
+  }
+  .g-new-btn:hover { color: var(--text); border-color: #555; }
+
+  /* suggest */
+  .suggest-box {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px; max-width: 440px;
+  }
+  .suggest-box p { font-size: 0.8rem; color: var(--muted); margin-bottom: 14px; line-height: 1.6; }
+  .suggest-input {
+    width: 100%; padding: 9px 12px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; font-family: inherit; font-size: 0.82rem; color: var(--text);
+    outline: none; margin-bottom: 9px; transition: border-color 0.15s;
+  }
+  .suggest-input:focus { border-color: var(--accent); }
+  .suggest-input::placeholder { color: var(--muted); }
+  .suggest-submit {
+    width: 100%; padding: 10px; background: var(--accent); color: #fff;
+    border: none; border-radius: 8px; font-family: inherit; font-size: 0.82rem;
+    font-weight: 600; cursor: pointer; transition: all 0.15s;
+  }
+  .suggest-submit:hover { filter: brightness(1.1); }
+  .suggest-thanks { display: none; margin-top: 9px; padding: 9px; background: rgba(76,175,125,0.12); color: var(--correct); border-radius: 7px; font-size: 0.78rem; font-weight: 500; text-align: center; }
+
+  /* footer */
+  footer { border-top: 1px solid var(--border); padding: 28px 40px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  footer p { font-size: 0.72rem; color: var(--muted); }
+
+  /* tab content */
+  [id$="-tab"] { display: none; }
+  [id$="-tab"].active { display: block; }
+
+  /* screens */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  @media (max-width: 600px) {
+    nav { padding: 0 16px; }
+    .controls, .grid-wrap, .section-label, footer { padding-left: 16px; padding-right: 16px; }
+    .games-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 9px; }
+    .modal { padding: 22px 16px; }
+    .cat-grid { grid-template-columns: 1fr; }
+    #snakeCanvas { width: 300px !important; height: 300px !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Fire<span>work</span></div>
+  <div class="nav-right">
+    <a href="#" onclick="switchTab('games');return false;" id="nav-games" class="active">Games</a>
+    <a href="#" onclick="switchTab('roms');return false;" id="nav-roms">ROMs</a>
+    <a href="#">Discord</a>
+    <a href="#">About</a>
+  </div>
+</nav>
+
+<!-- GAMES TAB -->
+<div id="games-tab" class="active">
+
+  <div class="controls">
+    <div class="search-random-row">
+      <div class="search-wrap">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <circle cx="5.5" cy="5.5" r="4" stroke="white" stroke-width="1.3"/>
+          <line x1="8.8" y1="8.8" x2="11.5" y2="11.5" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+        <input type="text" id="gameSearch" placeholder="Search games..." oninput="filterGames()">
+      </div>
+      <button class="random-btn" onclick="pickRandom()">⚄ Choose for me</button>
+    </div>
+    <div class="sort-btns">
+      <button class="sort-btn active" onclick="sortGames('recommended',this)">Recommended</button>
+      <button class="sort-btn" onclick="sortGames('az',this)">A → Z</button>
+      <button class="sort-btn" onclick="sortGames('za',this)">Z → A</button>
+      <button class="sort-btn" onclick="sortGames('newest',this)">Newest</button>
+    </div>
+  </div>
+
+  <div class="section-label">Games</div>
+  <div class="grid-wrap">
+    <div class="games-grid" id="mainGrid">
+
+      <div class="game-card" onclick="openFlash('https://cdn.ruffle.rs/builds/selfhosted/latest/ruffle.js','https://www.silvergames.com/games/drive-mad/game.swf','Drive Mad')" data-title="Drive Mad" data-order="0" data-date="20250522">
+        <div class="card-thumb" style="background-image:url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80');"></div>
+        <div class="card-body">
+          <div class="card-title">Drive Mad</div>
+          <div class="card-meta">Racing · Physics</div>
+          <span class="card-tag tag-play">Play</span>
+        </div>
+      </div>
+
+      <div class="game-card" onclick="openFlash('https://cdn.ruffle.rs/builds/selfhosted/latest/ruffle.js','https://armorgames.com/games/bitlife/game.swf','BitLife')" data-title="BitLife" data-order="1" data-date="20250523">
+        <div class="card-thumb" style="background-image:url('https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=400&q=80');"></div>
+        <div class="card-body">
+          <div class="card-title">BitLife</div>
+          <div class="card-meta">Simulation · Life</div>
+          <span class="card-tag tag-play">Play</span>
+        </div>
+      </div>
+
+      <div class="game-card" onclick="open2048()" data-title="2048" data-order="2" data-date="20250103">
+        <div class="card-thumb" style="background-image:url('2048.webp');"></div>
+        <div class="card-body">
+          <div class="card-title">2048</div>
+          <div class="card-meta">Puzzle · Arrow keys</div>
+          <span class="card-tag tag-play">Play</span>
+        </div>
+      </div>
+
+      <div class="game-card" onclick="openSnake()" data-title="Snake" data-order="3" data-date="20250104">
+        <div class="card-thumb" style="background-image:url('https://images.unsplash.com/photo-1614680376739-414d95ff43df?w=400&q=80');"></div>
+        <div class="card-body">
+          <div class="card-title">Snake</div>
+          <div class="card-meta">Classic · Arrow keys</div>
+          <span class="card-tag tag-play">Play</span>
+        </div>
+      </div>
+
+      <div class="game-card" onclick="window.open('ULTRAKILL.html','_blank')" data-title="Ultrakill" data-order="4" data-date="20250520">
+        <div class="card-thumb" style="background-image:url('https://images.unsplash.com/photo-1552820728-8b83bb6b773f?w=400&q=80');"></div>
+        <div class="card-body">
+          <div class="card-title">Ultrakill</div>
+          <div class="card-meta">Action · FPS</div>
+          <span class="card-tag tag-play">Play</span>
+        </div>
+      </div>
+
+      <div class="game-card" onclick="window.open('SLOPE.html','_blank')" data-title="Slope" data-order="5" data-date="20250521">
+        <div class="card-thumb" style="background-image:url('slope.webp');"></div>
+        <div class="card-body">
+          <div class="card-title">Slope</div>
+          <div class="card-meta">Arcade · Endless runner</div>
+          <span class="card-tag tag-play">Play</span>
+        </div>
+      </div>
+
+      <div class="game-card" onclick="openFlash('https://cdn.ruffle.rs/builds/selfhosted/latest/ruffle.js','https://www.silvergames.com/games/gladihoppers/game.swf','Gladihoppers')" data-title="Gladihoppers" data-order="6" data-date="20250524">
+        <div class="card-thumb" style="background-image:url('https://images.unsplash.com/photo-1592478411213-6153e4ebc07d?w=400&q=80');"></div>
+        <div class="card-body">
+          <div class="card-title">Gladihoppers</div>
+          <div class="card-meta">Fighting · Arena</div>
+          <span class="card-tag tag-play">Play</span>
+        </div>
+      </div>
+
+      <div class="game-card coming-soon" data-title="Chess" data-order="8" data-date="20250109">
+        <div class="card-thumb" style="background-image:url('https://images.unsplash.com/photo-1529699211952-734e80c4d42b?w=400&q=80');"></div>
+        <div class="card-body">
+          <div class="card-title">Chess</div>
+          <div class="card-meta">Strategy · vs AI</div>
+          <span class="card-tag tag-soon">Soon</span>
+        </div>
+      </div>
+
+      <div class="game-card coming-soon" data-title="Minesweeper" data-order="9" data-date="20250110">
+        <div class="card-thumb" style="background-image:url('https://images.unsplash.com/photo-1600377709267-5e0c20e17a3f?w=400&q=80');"></div>
+        <div class="card-body">
+          <div class="card-title">Minesweeper</div>
+          <div class="card-meta">Logic · Classic</div>
+          <span class="card-tag tag-soon">Soon</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SUGGEST -->
+  <div style="padding: 0 40px 40px;">
+    <div class="section-label" style="padding-left:0;padding-bottom:14px;">Suggest a Game</div>
+    <div class="suggest-box">
+      <p>Missing a game? Submit a suggestion and we might add it next.</p>
+      <input type="text" class="suggest-input" id="suggestInput" placeholder="e.g. Wordle, Chess, Tetris...">
+      <button class="suggest-submit" onclick="submitSuggestion()">Submit →</button>
+      <div class="suggest-thanks" id="suggestThanks">✓ Thanks! We'll look into it.</div>
+    </div>
+  </div>
+
+</div><!-- end games tab -->
+
+<!-- ROMS TAB -->
+<div id="roms-tab">
+  <div style="padding: 40px;">
+    <div class="suggest-box" style="max-width:500px;">
+      <div style="font-size:2rem;margin-bottom:12px;">🕹️</div>
+      <div style="font-weight:700;font-size:1.1rem;margin-bottom:8px;">ROM Library</div>
+      <p>Classic retro game ROMs coming soon. Check back regularly as we build out the library.</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>© 2026 Firework. All games are property of their respective owners.</p>
+  <p>Not affiliated with any game developers or publishers.</p>
+</footer>
+
+<!-- ── TRIVIA MODAL ── -->
+<div class="modal-overlay" id="triviaModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeTrivia()">✕</button>
+    <div class="screen active" id="t-start">
+      <h2>🧠 Trivia Quiz</h2>
+      <p class="sub">Pick a category. 10 questions per round.</p>
+      <div class="cat-grid">
+        <button class="cat-btn sel" onclick="selCat(this,'general')"><span class="ci">🌍</span><span class="cn">General</span><span class="cc">Mixed topics</span></button>
+        <button class="cat-btn" onclick="selCat(this,'science')"><span class="ci">🔬</span><span class="cn">Science</span><span class="cc">Bio, Physics, Chem</span></button>
+        <button class="cat-btn" onclick="selCat(this,'history')"><span class="ci">🏛️</span><span class="cn">History</span><span class="cc">World events</span></button>
+        <button class="cat-btn" onclick="selCat(this,'pop')"><span class="ci">🎬</span><span class="cn">Pop Culture</span><span class="cc">Movies, music</span></button>
+      </div>
+      <button class="btn-main" onclick="startTrivia()">Start →</button>
+    </div>
+    <div class="screen" id="t-game">
+      <div class="prog-bar"><div class="prog-fill" id="tProg" style="width:10%"></div></div>
+      <div class="q-meta"><span id="tQNum">Q 1/10</span><span class="q-score" id="tScore">0 pts</span></div>
+      <div class="q-text" id="tQ"></div>
+      <div class="opts" id="tOpts"></div>
+      <div class="feedback" id="tFb"></div>
+      <button class="btn-next" id="tNext" onclick="nextTQ()">Next →</button>
+    </div>
+    <div class="screen" id="t-result">
+      <div class="res-circle"><span class="res-num" id="tRNum">0</span><span class="res-of">/ 10</span></div>
+      <div class="res-title" id="tRTitle"></div>
+      <div class="res-sub" id="tRSub"></div>
+      <div class="res-breakdown">
+        <div class="bd-item"><span class="bd-num" id="tRC" style="color:var(--correct)">0</span><span class="bd-label">Correct</span></div>
+        <div class="bd-item"><span class="bd-num" id="tRW" style="color:var(--wrong)">0</span><span class="bd-label">Wrong</span></div>
+        <div class="bd-item"><span class="bd-num" id="tRP" style="color:var(--accent)">0%</span><span class="bd-label">Accuracy</span></div>
+      </div>
+      <button class="btn-main" onclick="showTScreen('t-start')">Play Again</button>
+      <button class="btn-sec" onclick="closeTrivia()">Back to Portal</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── FLAG MODAL ── -->
+<div class="modal-overlay" id="flagModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeFlag()">✕</button>
+    <div class="screen active" id="f-start">
+      <h2>🚩 Flag Guesser</h2>
+      <p class="sub">A flag appears — name the country. 10 rounds.</p>
+      <button class="btn-main" onclick="startFlag()">Start →</button>
+    </div>
+    <div class="screen" id="f-game">
+      <div class="prog-bar"><div class="prog-fill" id="fProg" style="width:10%"></div></div>
+      <div class="q-meta"><span id="fQNum">Round 1/10</span><span class="q-score" id="fScore">0 pts</span></div>
+      <div class="flag-big" id="fFlag">🏳️</div>
+      <div class="opts" id="fOpts"></div>
+      <div class="feedback" id="fFb"></div>
+      <button class="btn-next" id="fNext" onclick="nextFQ()">Next →</button>
+    </div>
+    <div class="screen" id="f-result">
+      <div class="res-circle"><span class="res-num" id="fRNum">0</span><span class="res-of">/ 10</span></div>
+      <div class="res-title" id="fRTitle"></div>
+      <div class="res-sub" id="fRSub"></div>
+      <div class="res-breakdown">
+        <div class="bd-item"><span class="bd-num" id="fRC" style="color:var(--correct)">0</span><span class="bd-label">Correct</span></div>
+        <div class="bd-item"><span class="bd-num" id="fRW" style="color:var(--wrong)">0</span><span class="bd-label">Wrong</span></div>
+        <div class="bd-item"><span class="bd-num" id="fRP" style="color:var(--accent)">0%</span><span class="bd-label">Accuracy</span></div>
+      </div>
+      <button class="btn-main" onclick="showFScreen('f-start')">Play Again</button>
+      <button class="btn-sec" onclick="closeFlag()">Back to Portal</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 2048 MODAL ── -->
+<div class="modal-overlay" id="modal2048">
+  <div class="modal">
+    <button class="modal-close" onclick="close2048()">✕</button>
+    <div class="screen active" id="g2048">
+      <h2 style="margin-bottom:4px;">🔢 2048</h2>
+      <p class="sub">Arrow keys to slide. Combine tiles to reach 2048.</p>
+      <div class="game-score-row">
+        <span style="font-size:0.75rem;color:var(--muted);">SCORE</span>
+        <span class="g-score-val" id="s2048">0</span>
+        <button class="g-new-btn" onclick="init2048()">New Game</button>
+      </div>
+      <div class="grid2048" id="grid2048"></div>
+      <div id="msg2048" style="text-align:center;font-size:0.95rem;font-weight:600;margin-top:10px;min-height:24px;color:var(--accent);"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SNAKE MODAL ── -->
+<div class="modal-overlay" id="snakeModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeSnake()">✕</button>
+    <div class="screen active" id="gSnake">
+      <h2 style="margin-bottom:4px;">🐍 Snake</h2>
+      <p class="sub">Arrow keys to steer. Don't hit the walls!</p>
+      <div class="game-score-row">
+        <span style="font-size:0.75rem;color:var(--muted);">SCORE</span>
+        <span class="g-score-val" id="sSnake">0</span>
+        <button class="g-new-btn" onclick="initSnake()">New Game</button>
+      </div>
+      <canvas id="snakeCanvas" width="360" height="360"></canvas>
+      <div id="snakeMsg" style="text-align:center;font-size:0.85rem;font-weight:600;margin-top:10px;min-height:22px;color:var(--wrong);"></div>
+    </div>
+  </div>
+</div>
+
+<!-- FLASH / RUFFLE MODAL -->
+<div class="modal-overlay" id="flashModal">
+  <div class="modal" style="max-width:860px;padding:0;overflow:hidden;border-radius:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--surface);border-bottom:1px solid var(--border);">
+      <span id="flashTitle" style="font-weight:700;font-size:0.95rem;"></span>
+      <button class="modal-close" style="position:static;" onclick="closeFlash()">✕</button>
+    </div>
+    <div id="flashContainer" style="width:100%;height:520px;background:#000;display:flex;align-items:center;justify-content:center;">
+      <p style="color:var(--muted);font-size:0.85rem;">Loading game…</p>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── UTIL ── */
+const $ = id => document.getElementById(id);
+const shuffle = a => a.slice().sort(() => Math.random() - 0.5);
+
+/* ── TABS ── */
+function switchTab(tab) {
+  ['games','roms'].forEach(t => {
+    $(t+'-tab').classList.toggle('active', t===tab);
+    $('nav-'+t).classList.toggle('active', t===tab);
+  });
+}
+
+/* ── SEARCH / SORT ── */
+function filterGames() {
+  const q = $('gameSearch').value.toLowerCase();
+  document.querySelectorAll('#mainGrid .game-card').forEach(c => {
+    const t = c.dataset.title.toLowerCase();
+    c.style.display = t.includes(q) ? '' : 'none';
+  });
+}
+
+function sortGames(type, btn) {
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const grid = $('mainGrid');
+  const cards = Array.from(grid.children);
+  cards.sort((a, b) => {
+    if (type === 'az') return a.dataset.title.localeCompare(b.dataset.title);
+    if (type === 'za') return b.dataset.title.localeCompare(a.dataset.title);
+    if (type === 'newest') return b.dataset.date - a.dataset.date;
+    return a.dataset.order - b.dataset.order;
+  });
+  cards.forEach(c => grid.appendChild(c));
+}
+
+function pickRandom() {
+  const p = Array.from(document.querySelectorAll('#mainGrid .game-card:not(.coming-soon)'));
+  if (p.length) p[Math.floor(Math.random() * p.length)].click();
+}
+
+function submitSuggestion() {
+  const v = $('suggestInput').value.trim();
+  if (!v) return;
+  $('suggestInput').value = '';
+  $('suggestThanks').style.display = 'block';
+  setTimeout(() => $('suggestThanks').style.display = 'none', 3000);
+}
+
+/* ── TRIVIA ── */
+const QS = {
+  general:[
+    {q:"Capital of Australia?",o:["Sydney","Melbourne","Canberra","Perth"],a:2},
+    {q:"Sides on a hexagon?",o:["5","6","7","8"],a:1},
+    {q:"Which is the Red Planet?",o:["Venus","Jupiter","Saturn","Mars"],a:3},
+    {q:"Largest ocean?",o:["Atlantic","Indian","Pacific","Arctic"],a:2},
+    {q:"Who painted the Mona Lisa?",o:["Michelangelo","Leonardo da Vinci","Raphael","Donatello"],a:1},
+    {q:"Bones in the human body?",o:["186","206","226","256"],a:1},
+    {q:"Symbol for gold?",o:["Go","Gd","Au","Ag"],a:2},
+    {q:"Country with most natural lakes?",o:["Russia","USA","Brazil","Canada"],a:3},
+    {q:"WW2 ended in?",o:["1943","1944","1945","1946"],a:2},
+    {q:"Smallest country?",o:["Monaco","San Marino","Liechtenstein","Vatican City"],a:3},
+  ],
+  science:[
+    {q:"Powerhouse of the cell?",o:["Nucleus","Ribosome","Mitochondria","Golgi body"],a:2},
+    {q:"Speed of light (approx)?",o:["150,000 km/s","300,000 km/s","450,000 km/s","600,000 km/s"],a:1},
+    {q:"Gas plants absorb?",o:["Oxygen","Nitrogen","Carbon Dioxide","Hydrogen"],a:2},
+    {q:"Elements on periodic table?",o:["108","112","118","124"],a:2},
+    {q:"H2O is?",o:["Hydrogen Peroxide","Water","Oxygen Gas","Heavy Water"],a:1},
+    {q:"Force keeping planets in orbit?",o:["Magnetism","Friction","Gravity","Nuclear"],a:2},
+    {q:"Hardest natural substance?",o:["Gold","Iron","Diamond","Quartz"],a:2},
+    {q:"Planet with most moons?",o:["Jupiter","Saturn","Uranus","Neptune"],a:1},
+    {q:"Energy the sun produces?",o:["Chemical","Nuclear","Electrical","Mechanical"],a:1},
+    {q:"DNA stands for?",o:["Deoxyribonucleic Acid","Dioxynucleic Acid","Dinitrogen Acid","Deoxynitrogen Acid"],a:0},
+  ],
+  history:[
+    {q:"Berlin Wall fell in?",o:["1987","1988","1989","1990"],a:2},
+    {q:"First US President?",o:["John Adams","Thomas Jefferson","George Washington","Benjamin Franklin"],a:2},
+    {q:"Ancient wonder in Alexandria?",o:["The Colossus","The Lighthouse","The Mausoleum","Statue of Zeus"],a:1},
+    {q:"Titanic sank in?",o:["1910","1911","1912","1913"],a:2},
+    {q:"Julius Caesar ruled which empire?",o:["Greek","Ottoman","Roman","Byzantine"],a:2},
+    {q:"First artificial satellite?",o:["Vostok","Apollo","Sputnik","Explorer"],a:2},
+    {q:"Industrial Revolution began in?",o:["France","Germany","USA","England"],a:3},
+    {q:"Wrote Declaration of Independence?",o:["George Washington","Thomas Jefferson","John Adams","Alexander Hamilton"],a:1},
+    {q:"WW1 started in?",o:["1912","1913","1914","1915"],a:2},
+    {q:"City divided 1961–1989?",o:["Warsaw","Vienna","Paris","Berlin"],a:3},
+  ],
+  pop:[
+    {q:"'To infinity and beyond!' — film?",o:["A Bug's Life","Toy Story","Finding Nemo","Cars"],a:1},
+    {q:"Harry Potter books — how many?",o:["5","6","7","8"],a:2},
+    {q:"Best-selling video game ever?",o:["Tetris","GTA V","Minecraft","Mario Kart"],a:2},
+    {q:"Band behind Bohemian Rhapsody?",o:["Beatles","Led Zeppelin","Queen","Rolling Stones"],a:2},
+    {q:"Stranger Things streams on?",o:["HBO","Hulu","Netflix","Disney+"],a:2},
+    {q:"Iron Man actor in MCU?",o:["Chris Evans","Chris Hemsworth","Robert Downey Jr.","Mark Ruffalo"],a:2},
+    {q:"Highest-grossing film ever?",o:["Titanic","Avengers: Endgame","Avatar","Star Wars"],a:2},
+    {q:"Platform known for Reels?",o:["Twitter","LinkedIn","Pinterest","Instagram"],a:3},
+    {q:"First iPhone released in?",o:["2005","2006","2007","2008"],a:2},
+    {q:"K-pop origin country?",o:["Japan","China","South Korea","Thailand"],a:2},
+  ]
+};
+
+let tCat='general', tQs=[], tIdx=0, tSc=0, tAns=false;
+const L=['A','B','C','D'];
+
+function openTrivia(){ $('triviaModal').classList.add('active'); showTScreen('t-start'); }
+function closeTrivia(){ $('triviaModal').classList.remove('active'); }
+function showTScreen(id){ document.querySelectorAll('#triviaModal .screen').forEach(s=>s.classList.remove('active')); $(id).classList.add('active'); }
+function selCat(btn,cat){ document.querySelectorAll('#triviaModal .cat-btn').forEach(b=>b.classList.remove('sel')); btn.classList.add('sel'); tCat=cat; }
+
+function startTrivia(){
+  tQs=shuffle(QS[tCat]).slice(0,10); tIdx=0; tSc=0;
+  showTScreen('t-game'); renderTQ();
+}
+
+function renderTQ(){
+  tAns=false;
+  const q=tQs[tIdx];
+  $('tProg').style.width=((tIdx+1)/10*100)+'%';
+  $('tQNum').textContent=`Q ${tIdx+1} / 10`;
+  $('tScore').textContent=`${tSc} pts`;
+  $('tQ').textContent=q.q;
+  $('tFb').className='feedback';
+  $('tNext').className='btn-next';
+  const ol=$('tOpts'); ol.innerHTML='';
+  q.o.forEach((opt,i)=>{ const b=document.createElement('button'); b.className='opt-btn'; b.innerHTML=`<span class="ol">${L[i]}</span>${opt}`; b.onclick=()=>pickTQ(i); ol.appendChild(b); });
+}
+
+function pickTQ(c){
+  if(tAns) return; tAns=true;
+  const q=tQs[tIdx]; const btns=document.querySelectorAll('#triviaModal .opt-btn'); const fb=$('tFb');
+  btns.forEach(b=>b.disabled=true); btns[q.a].classList.add('correct');
+  if(c===q.a){ tSc++; fb.textContent='✓ Correct!'; fb.className='feedback correct show'; }
+  else{ btns[c].classList.add('wrong'); fb.textContent=`✗ Answer: ${q.o[q.a]}`; fb.className='feedback wrong show'; }
+  $('tScore').textContent=`${tSc} pts`;
+  $('tNext').className='btn-next show';
+}
+
+function nextTQ(){ tIdx++; tIdx>=10 ? showTResult() : renderTQ(); }
+
+function showTResult(){
+  showTScreen('t-result'); const p=Math.round(tSc/10*100);
+  $('tRNum').textContent=tSc; $('tRC').textContent=tSc; $('tRW').textContent=10-tSc; $('tRP').textContent=p+'%';
+  const [t,s]=tSc===10?['🏆 Perfect!','Flawless!']:tSc>=8?['🌟 Excellent!','Almost perfect!']:tSc>=6?['👍 Good Job!','Solid round!']:tSc>=4?['📚 Keep Learning!','Room to improve!']:['💪 Keep at it!','You got this!'];
+  $('tRTitle').textContent=t; $('tRSub').textContent=s;
+}
+
+$('triviaModal').addEventListener('click',e=>{ if(e.target===$('triviaModal')) closeTrivia(); });
+
+/* ── FLAGS ── */
+const FLAGS=[
+  {f:'🇺🇸',n:'United States'},{f:'🇬🇧',n:'United Kingdom'},{f:'🇫🇷',n:'France'},{f:'🇩🇪',n:'Germany'},
+  {f:'🇯🇵',n:'Japan'},{f:'🇨🇳',n:'China'},{f:'🇧🇷',n:'Brazil'},{f:'🇮🇳',n:'India'},
+  {f:'🇨🇦',n:'Canada'},{f:'🇦🇺',n:'Australia'},{f:'🇲🇽',n:'Mexico'},{f:'🇮🇹',n:'Italy'},
+  {f:'🇪🇸',n:'Spain'},{f:'🇷🇺',n:'Russia'},{f:'🇰🇷',n:'South Korea'},{f:'🇸🇦',n:'Saudi Arabia'},
+  {f:'🇳🇬',n:'Nigeria'},{f:'🇿🇦',n:'South Africa'},{f:'🇦🇷',n:'Argentina'},{f:'🇹🇷',n:'Turkey'},
+  {f:'🇳🇱',n:'Netherlands'},{f:'🇸🇪',n:'Sweden'},{f:'🇳🇴',n:'Norway'},{f:'🇨🇭',n:'Switzerland'},
+  {f:'🇵🇹',n:'Portugal'},{f:'🇬🇷',n:'Greece'},{f:'🇵🇱',n:'Poland'},{f:'🇺🇦',n:'Ukraine'},
+  {f:'🇪🇬',n:'Egypt'},{f:'🇮🇩',n:'Indonesia'},{f:'🇵🇭',n:'Philippines'},{f:'🇻🇳',n:'Vietnam'},
+  {f:'🇹🇭',n:'Thailand'},{f:'🇲🇾',n:'Malaysia'},{f:'🇸🇬',n:'Singapore'},{f:'🇳🇿',n:'New Zealand'},
+  {f:'🇮🇪',n:'Ireland'},{f:'🇧🇪',n:'Belgium'},{f:'🇦🇹',n:'Austria'},{f:'🇩🇰',n:'Denmark'},
+  {f:'🇫🇮',n:'Finland'},{f:'🇮🇱',n:'Israel'},{f:'🇦🇪',n:'UAE'},{f:'🇲🇦',n:'Morocco'},
+  {f:'🇨🇱',n:'Chile'},{f:'🇵🇪',n:'Peru'},{f:'🇨🇴',n:'Colombia'},{f:'🇵🇰',n:'Pakistan'},
+];
+let fQs=[], fIdx=0, fSc=0, fAns=false;
+
+function openFlag(){ $('flagModal').classList.add('active'); showFScreen('f-start'); }
+function closeFlag(){ $('flagModal').classList.remove('active'); }
+function showFScreen(id){ document.querySelectorAll('#flagModal .screen').forEach(s=>s.classList.remove('active')); $(id).classList.add('active'); }
+
+function startFlag(){ fQs=shuffle(FLAGS).slice(0,10); fIdx=0; fSc=0; showFScreen('f-game'); renderFQ(); }
+
+function renderFQ(){
+  fAns=false;
+  const correct=fQs[fIdx];
+  $('fProg').style.width=((fIdx+1)/10*100)+'%';
+  $('fQNum').textContent=`Round ${fIdx+1} / 10`;
+  $('fScore').textContent=`${fSc} pts`;
+  $('fFlag').textContent=correct.f;
+  $('fFb').className='feedback';
+  $('fNext').className='btn-next';
+  const pool=FLAGS.filter(x=>x.n!==correct.n);
+  const opts=shuffle([correct,...shuffle(pool).slice(0,3)]);
+  const ol=$('fOpts'); ol.innerHTML='';
+  opts.forEach(opt=>{ const b=document.createElement('button'); b.className='opt-btn'; b.innerHTML=`<span class="ol" style="border-radius:3px;width:auto;padding:0 5px;font-size:0.65rem;">${opt.f}</span>${opt.n}`; b.onclick=()=>pickFQ(b,opt.n===correct.n,correct.n); ol.appendChild(b); });
+}
+
+function pickFQ(clicked,isOk,correctName){
+  if(fAns) return; fAns=true;
+  document.querySelectorAll('#fOpts .opt-btn').forEach(b=>{ b.disabled=true; if(b.textContent.includes(correctName)) b.classList.add('correct'); });
+  if(isOk){ fSc++; $('fFb').textContent='✓ Correct!'; $('fFb').className='feedback correct show'; }
+  else{ clicked.classList.add('wrong'); $('fFb').textContent=`✗ That was ${correctName}`; $('fFb').className='feedback wrong show'; }
+  $('fScore').textContent=`${fSc} pts`;
+  $('fNext').className='btn-next show';
+}
+
+function nextFQ(){ fIdx++; fIdx>=10 ? showFResult() : renderFQ(); }
+
+function showFResult(){
+  showFScreen('f-result'); const p=Math.round(fSc/10*100);
+  $('fRNum').textContent=fSc; $('fRC').textContent=fSc; $('fRW').textContent=10-fSc; $('fRP').textContent=p+'%';
+  const t=fSc===10?'🏆 Geography Master!':fSc>=7?'🌍 Well Traveled!':fSc>=4?'🗺️ Getting There!':'✈️ Time to Explore!';
+  $('fRTitle').textContent=t; $('fRSub').textContent=`${fSc}/10 — ${p}% accuracy`;
+}
+
+$('flagModal').addEventListener('click',e=>{ if(e.target===$('flagModal')) closeFlag(); });
+
+/* ── 2048 ── */
+let b2=[], s2v=0;
+const C2={0:['#2a2a38','#555'],2:['#eee4da','#776e65'],4:['#ede0c8','#776e65'],8:['#f2b179','#f9f6f2'],16:['#f59563','#f9f6f2'],32:['#f67c5f','#f9f6f2'],64:['#f65e3b','#f9f6f2'],128:['#edcf72','#f9f6f2'],256:['#edcc61','#f9f6f2'],512:['#edc850','#f9f6f2'],1024:['#edc53f','#f9f6f2'],2048:['#edc22e','#f9f6f2']};
+
+function open2048(){ $('modal2048').classList.add('active'); init2048(); }
+function close2048(){ $('modal2048').classList.remove('active'); }
+function init2048(){ b2=Array.from({length:4},()=>Array(4).fill(0)); s2v=0; $('s2048').textContent='0'; $('msg2048').textContent=''; addT2(); addT2(); render2(); }
+function addT2(){ const e=[]; for(let r=0;r<4;r++) for(let c=0;c<4;c++) if(!b2[r][c]) e.push([r,c]); if(!e.length) return; const [r,c]=e[Math.floor(Math.random()*e.length)]; b2[r][c]=Math.random()<0.9?2:4; }
+function render2(){
+  const g=$('grid2048'); g.innerHTML='';
+  for(let r=0;r<4;r++) for(let c=0;c<4;c++){
+    const v=b2[r][c]; const cell=document.createElement('div'); cell.className='cell2048';
+    const [bg,fg]=C2[v]||['#3c3a32','#f9f6f2']; cell.style.background=bg; cell.style.color=fg;
+    if(v>99) cell.style.fontSize='0.9rem'; if(v>999) cell.style.fontSize='0.7rem';
+    cell.textContent=v||''; g.appendChild(cell);
+  }
+  $('s2048').textContent=s2v;
+}
+function rot2(m){ return m[0].map((_,c)=>m.map(r=>r[c]).reverse()); }
+function applyLeft2(board){
+  return board.map(row=>{
+    let r=row.filter(x=>x); let nr=[];
+    for(let i=0;i<r.length;i++){ if(r[i]===r[i+1]){ nr.push(r[i]*2); s2v+=r[i]*2; i++; } else nr.push(r[i]); }
+    while(nr.length<4) nr.push(0); return nr;
+  });
+}
+function move2(dir){
+  const rots={left:0,right:2,up:3,down:1}; let moved=false;
+  let bd=b2.map(r=>[...r]); let n=rots[dir];
+  for(let i=0;i<n;i++) bd=rot2(bd);
+  const nb=applyLeft2(bd);
+  let back=nb; const br=(4-n)%4; for(let i=0;i<br;i++) back=rot2(back);
+  for(let r=0;r<4;r++) for(let c=0;c<4;c++) if(b2[r][c]!==back[r][c]) moved=true;
+  b2=back;
+  if(moved){ addT2(); render2(); check2(); }
+}
+function check2(){
+  for(let r=0;r<4;r++) for(let c=0;c<4;c++){
+    if(b2[r][c]===2048){ $('msg2048').textContent='🏆 You reached 2048!'; return; }
+    if(!b2[r][c]) return;
+    if(c<3&&b2[r][c]===b2[r][c+1]) return;
+    if(r<3&&b2[r][c]===b2[r+1][c]) return;
+  }
+  $('msg2048').textContent='Game Over — try again!';
+}
+$('modal2048').addEventListener('click',e=>{ if(e.target===$('modal2048')) close2048(); });
+
+/* ── SNAKE ── */
+let sp=[], sd={x:1,y:0}, sf={}, ssv=0, sl=null, sRun=false;
+const SC=18, COLS=20;
+function openSnake(){ $('snakeModal').classList.add('active'); initSnake(); }
+function closeSnake(){ $('snakeModal').classList.remove('active'); if(sl) clearInterval(sl); }
+function initSnake(){ if(sl) clearInterval(sl); sp=[{x:10,y:10},{x:9,y:10},{x:8,y:10}]; sd={x:1,y:0}; ssv=0; sRun=true; $('sSnake').textContent='0'; $('snakeMsg').textContent=''; placeF(); drawS(); sl=setInterval(tickS,130); }
+function placeF(){ do{ sf={x:Math.floor(Math.random()*COLS),y:Math.floor(Math.random()*COLS)}; }while(sp.some(p=>p.x===sf.x&&p.y===sf.y)); }
+function tickS(){
+  if(!sRun) return;
+  const h={x:sp[0].x+sd.x,y:sp[0].y+sd.y};
+  if(h.x<0||h.x>=COLS||h.y<0||h.y>=COLS||sp.some(p=>p.x===h.x&&p.y===h.y)){ sRun=false; clearInterval(sl); $('snakeMsg').textContent='Game Over! Hit New Game to retry.'; return; }
+  sp.unshift(h);
+  if(h.x===sf.x&&h.y===sf.y){ ssv+=10; $('sSnake').textContent=ssv; placeF(); } else sp.pop();
+  drawS();
+}
+function drawS(){
+  const cv=$('snakeCanvas'); const ctx=cv.getContext('2d');
+  ctx.fillStyle='#0f0f13'; ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.fillStyle='#1a1a22'; for(let x=0;x<COLS;x++) for(let y=0;y<COLS;y++) if((x+y)%2===0) ctx.fillRect(x*SC,y*SC,SC,SC);
+  sp.forEach((p,i)=>{ ctx.fillStyle=i===0?'#6c63ff':'#9b94ff'; ctx.beginPath(); ctx.roundRect(p.x*SC+1,p.y*SC+1,SC-2,SC-2,3); ctx.fill(); });
+  ctx.fillStyle='#ff6584'; ctx.beginPath(); ctx.arc(sf.x*SC+SC/2,sf.y*SC+SC/2,SC/2-2,0,Math.PI*2); ctx.fill();
+}
+
+/* keyboard */
+document.addEventListener('keydown', e => {
+  const is2048 = $('modal2048').classList.contains('active');
+  const isSnake = $('snakeModal').classList.contains('active');
+  if(is2048){ const m={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down'}; if(m[e.key]){ e.preventDefault(); move2(m[e.key]); } }
+  if(isSnake){ const d={ArrowUp:{x:0,y:-1},ArrowDown:{x:0,y:1},ArrowLeft:{x:-1,y:0},ArrowRight:{x:1,y:0}}; if(d[e.key]){ e.preventDefault(); const nd=d[e.key]; if(nd.x!==-sd.x||nd.y!==-sd.y) sd=nd; } }
+});
+$('snakeModal').addEventListener('click',e=>{ if(e.target===$('snakeModal')) closeSnake(); });
+
+/* ── RUFFLE / FLASH ── */
+function openFlash(ruffleUrl, swfUrl, title) {
+  $('flashTitle').textContent = title;
+  $('flashModal').classList.add('active');
+  const container = $('flashContainer');
+  container.innerHTML = '<p style="color:var(--muted);font-size:0.85rem;">Loading game…</p>';
+
+  // Load Ruffle dynamically
+  if (!window.RufflePlayer) {
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/@ruffle-rs/ruffle';
+    script.onload = () => launchSwf(swfUrl);
+    document.head.appendChild(script);
+  } else {
+    launchSwf(swfUrl);
+  }
+}
+
+function launchSwf(swfUrl) {
+  const container = $('flashContainer');
+  container.innerHTML = '';
+  const ruffle = window.RufflePlayer.newest();
+  const player = ruffle.createPlayer();
+  player.style.width = '100%';
+  player.style.height = '100%';
+  container.appendChild(player);
+  player.load(swfUrl);
+}
+
+function closeFlash() {
+  $('flashModal').classList.remove('active');
+  $('flashContainer').innerHTML = '';
+}
+
+$('flashModal').addEventListener('click', e => { if (e.target === $('flashModal')) closeFlash(); });
+</script>
+</body>
+</html>
